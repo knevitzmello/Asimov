@@ -4,7 +4,7 @@ class GrocyAPI:
     """
     Classe para interagir com a API do Grocy, gerenciando listas de compras e tarefas.
     """
-    def __init__(self, base_url, api_key):
+    def __init__(self, base_url, api_key, home_assistant_webhook_url_grocy):
         """
         Inicializa a classe com a URL base do Grocy e a chave da API.
 
@@ -16,6 +16,7 @@ class GrocyAPI:
             'GROCY-API-KEY': api_key,
             'Content-Type': 'application/json'
         }
+        self.base_url = home_assistant_webhook_url_grocy
 
     def add_shopping_list_item(self, note):
         """

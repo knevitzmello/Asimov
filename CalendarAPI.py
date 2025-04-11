@@ -1,8 +1,8 @@
 ﻿import requests
 
 class CalendarAPI():
-    def __init__(self):
-        self.webhook_url = 'http://192.168.0.235:8123/api/webhook/criar_evento'
+    def __init__(self, home_assistant_webhook_url_criar_evento):
+        self.webhook_url = home_assistant_webhook_url_criar_evento
 
     def criar_evento(self, titulo, data_inicio, data_fim):
         """Envia um webhook para o Home Assistant criar um evento no Google Calendar."""

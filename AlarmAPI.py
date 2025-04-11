@@ -1,9 +1,9 @@
 ﻿import requests
 
 class AlarmAPI:
-    def __init__(self):
+    def __init__(self, home_assistant_webhook_url_alarm):
         self.headers = {'Content-Type': 'application/json'}
-        self.webhook_url = 'http://192.168.0.235:8123/api/webhook/criar_alarme'
+        self.webhook_url = home_assistant_webhook_url_alarm
         
     def criar_alarme(self, parametros):
         if "despertador" in parametros:

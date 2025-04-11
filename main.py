@@ -27,24 +27,28 @@ spotify = SpotifyAPI(
     device_id= "DESKTOP-F9SQIII"
 )
 
-grocy = GrocyAPI(
-    base_url=secrets["grocy"]["base_url"],
-    api_key=secrets["grocy"]["api_key"]
-)
 
-home_assistant_webhook_url = secrets["home_assistant"]["webhook_url"]
+home_assistant_webhook_url_controlar_luz = secrets["home_assistant"]["controlar_luz"]
+home_assistant_webhook_url_grocy= secrets["home_assistant"]["grocy"]
+home_assistant_webhook_url_alarm = secrets["home_assistant"]["alarm"]
 
 caminho_modelos = os.path.join(os.path.dirname(__file__), "modelos")
 caminho_wakeword_asimov = os.path.join(caminho_modelos, "Asimov_en_windows_v3_0_0.ppn")
+
 # porcupine = pvporcupine.create(
 #     access_key=porcupine_access_key,
 #     keyword_paths=[caminho_wakeword_asimov]
 # )
 
+grocy = GrocyAPI(
+    base_url=secrets["grocy"]["base_url"],
+    api_key=secrets["grocy"]["api_key"],
+    home_assistant_webhook_url_grocy = home_assistant_webhook_url_grocy,
+)
 recognizer = sr.Recognizer()
 microfone = sr.Microphone()
-alarmAPI = AlarmAPI()
-controlarLuz = ControlarLuzAPI()
+alarmAPI = AlarmAPI(home_assistant_webhook_url_alarm)
+controlarLuz = ControlarLuzAPI(home_assistant_webhook_url_controlar_luz)
 interpretar = Interpretar()
 paud = pyaudio.PyAudio()
 vol = sv.SystemVolume()
@@ -94,7 +98,6 @@ def executar_comando(comando, parametros):
         case "set_horadedormir":
             alarmAPI.set_horadedormir(parametros.get('horario', None))
         case "ajustar_volume":
-            #spotify.change_volume(parametros.get('volume'), "DESKTOP-F9SQIII")
             vol.set_volume_percent(parametros.get('volume'))
         case "pausar_musica":
             spotify.pause_playback()
@@ -150,5 +153,5 @@ def ouvir_wakeword():
 #ouvir_wakeword()
 currentVolume = vol.get_volume_percent()
 #vol.set_volume_percent(5)
-interpreta_comando("volume em 55%")
+interpreta_comando("Ligar Bancada")
 #vol.set_volume_percent(currentVolume)

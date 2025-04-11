@@ -1,9 +1,9 @@
 ﻿import requests
 
 class ControlarLuzAPI:
-    def __init__(self):
+    def __init__(self, home_assistant_webhook_url_controlar_luz):
         self.headers = {'Content-Type': 'application/json'}
-        self.webhook_url = 'http://192.168.0.235:8123/api/webhook/controlar_luz'
+        self.webhook_url = home_assistant_webhook_url_controlar_luz
         
     def enviar_webhook(self, comando, area):
         print(self.webhook_url)

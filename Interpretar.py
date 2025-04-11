@@ -6,7 +6,7 @@ class Interpretar:
     def __init__(self):
         """Define palavras-chave para classificar comandos rapidamente"""
         self.verbos = {
-            "reproduzir_musica": {"tocar", "reproduzir", "toca", "reproduza"},
+            "reproduzir_musica": {"tocar", "reproduzir", "toca", "reproduza", "reproduz"},
             "pausar_musica": {"pausar", "parar", "pare", "pause"},
             "continuar_musica": {"continuar"},
             "ajustar_volume": {"volume", "diminuir", "aumentar", "ajuste", "diminua", "aumente"},
@@ -16,9 +16,18 @@ class Interpretar:
             "turn_on_light": {"ligar", "acender", "ligue", "acenda", "liga", "acende", "ajuste", "ajustar"},
             "turn_off_light": {"desligar", "apagar", "desligue", "apague", "apaga", "desliga", "desative", "desativar", "ativar", "ative"},
             "lista": {"adicionar", "adicione", "inclua", "comprar","insira", "acrescentar", "incluir", "inserir", "põe", "lista", "compras"},
-            "set_timer": {"timer", "avise", "avisar", "lembre-me", "lembrar", "alarme em"}
+            "set_timer": {"timer", "avise", "avisar", "lembre-me", "lembrar"}
         }
-        self.areas_validas = {"sala", "quarto", "escritório", "cozinha", "luminárias", "luminarias", "luminária 1", "luminaria 1", "luminária 2", "luminaria 2"}
+        self.areas_validas = {"sala", 
+                              "quarto", 
+                              "escritório", 
+                              "cozinha", 
+                              "luminárias", 
+                              "luminarias", 
+                              "Bancada",
+                              "Bancada 1", 
+                              "Bancada 2", 
+                              "Bancada 3"}
         self.verbos_compras = {"coloque", "coloca"}
     
     def classificar_intencao(self, frase):
