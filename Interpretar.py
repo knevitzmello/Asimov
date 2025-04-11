@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 class Interpretar:
     def __init__(self):
-        """Define palavras-chave para classificar comandos rapidamente"""
         self.verbos = {
             "reproduzir_musica": {"tocar", "reproduzir", "toca", "reproduza", "reproduz"},
             "pausar_musica": {"pausar", "parar", "pare", "pause"},
@@ -189,7 +188,6 @@ class Interpretar:
         return parametros
 
     def process_message(self, frase):
-        """Recebe a frase, classifica o comando e extrai parâmetros"""
         intent = self.classificar_intencao(frase)
         parametros = self.extrair_parametros(frase, intent) if intent != "unknown" else {}
         return intent, parametros

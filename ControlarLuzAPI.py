@@ -23,9 +23,7 @@ class ControlarLuzAPI:
             print(f"Erro ao conectar ao webhook: {e}")
 
     def ligar_luz(self, area):
-        """Liga a luz em uma área específica."""
         self.enviar_webhook("ligar", area)
 
     def desligar_luz(self, area):
-        """Desliga a luz em uma área específica."""
         self.enviar_webhook("desligar", area)

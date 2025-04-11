@@ -5,7 +5,6 @@ class CalendarAPI():
         self.webhook_url = home_assistant_webhook_url_criar_evento
 
     def criar_evento(self, titulo, data_inicio, data_fim):
-        """Envia um webhook para o Home Assistant criar um evento no Google Calendar."""
         evento_dados = {
             "titulo": titulo,
             "data_inicio": data_inicio,
