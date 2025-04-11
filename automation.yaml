@@ -1,0 +1,53 @@
+alias: Controlar Luz pelo Webhook 2
+description: >-
+  Recebe um webhook para ligar, desligar ou ajustar intensidade de uma luz
+  específica
+triggers:
+  - webhook_id: controlar_luz
+    allowed_methods:
+      - POST
+      - PUT
+    local_only: true
+    trigger: webhook
+conditions: []
+actions:
+  - variables:
+      area_map:
+        sala_de_estar:
+          entity_id: light.lampada_sala
+          suporta_intensidade: false
+        quarto:
+          entity_id: light.lampada_quarto
+          suporta_intensidade: true
+        escritório:
+          entity_id: light.led_bulb_w5k_3
+          suporta_intensidade: true
+        cozinha:
+          entity_id: light.cozinha
+          suporta_intensidade: true
+        luminária 1:
+          entity_id: light.quarto_2
+          suporta_intensidade: true
+      area: "{{ trigger.json.area }}"
+      estado: "{{ trigger.json.estado | lower }}"
+      intensidade: "{{ trigger.json.intensidade | default(100) | int }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ area in area_map and area_map[area].suporta_intensidade and
+              estado == 'dim' }}
+        sequence:
+          - target:
+              entity_id: "{{ area_map[area].entity_id }}"
+            data:
+              brightness_pct: "{{ intensidade }}"
+            action: light.turn_on
+      - conditions:
+          - condition: template
+            value_template: "{{ area in area_map and estado in ['on', 'off'] }}"
+        sequence:
+          - target:
+              entity_id: "{{ area_map[area].entity_id }}"
+            action: light.turn_{{ estado }}
+mode: single

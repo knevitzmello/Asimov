@@ -40,6 +40,9 @@ pip install -r requirements.txt
 
 3 - Configure as credenciais e endpoints no arquivo de configuração.
 
+
+4 - Crie as Automations no HASS que, ao receber o webhook, realizam uma ação (ver arquivo .yaml)
+
 # Uso
 
 Execute o assistente:
