@@ -12,6 +12,7 @@ from SpotifyAPI import SpotifyAPI
 from GrocyAPI import GrocyAPI
 import pyttsx3
 import SystemVolume as sv
+import threading
 
 def carregar_secrets():
     with open("secrets.json", "r") as file:
@@ -57,7 +58,12 @@ speaker=pyttsx3.init()
 voices = speaker.getProperty('voices')
 speaker.setProperty('voice', voices[0].id)
 rate = speaker.getProperty('rate')
-speaker.setProperty('rate', rate-45)
+speaker.setProperty('rate', rate+10)
+
+def speak(text):
+    speaker.say(text)
+    speaker.runAndWait()
+    speaker.stop()
 
 def selecionar_dispositivo_audio():
     print("Dispositivos de entrada de áudio disponíveis:")
@@ -81,30 +87,35 @@ indice_dispositivo = 1
 # )
 
 def executar_comando(comando, parametros):
-    match comando:
-        case "criar_alarme":
-            alarmAPI.criar_alarme(parametros)
-        case "turn_on_light":
-            controlarLuz.enviar_webhook("on", parametros.get('area'))
-        case "turn_off_light":
-            controlarLuz.enviar_webhook("off", parametros.get('area'))
-        case "reproduzir_musica":
-            if parametros:
-                musica = parametros.get('musica', None)
-            if musica != None:
-                spotify.play_music(musica)
-        case "set_despertador":
-            alarmAPI.criar_despertador(parametros.get('horario', None))
-        case "set_horadedormir":
-            alarmAPI.set_horadedormir(parametros.get('horario', None))
-        case "ajustar_volume":
-            vol.set_volume_percent(parametros.get('volume'))
-        case "pausar_musica":
-            spotify.pause_playback()
-        case "continuar_musica":
-            spotify.resume_playback()
-        case "lista":
-            add_item(parametros)
+
+    if any(value is None for value in parametros.values()):
+        print("Não entendi o comando")
+        #threading.Thread(target=speak, args=("Não entendi o comando",)).start()
+    else:
+        match comando:
+            case "criar_alarme":
+                alarmAPI.criar_alarme(parametros)
+            case "turn_on_light":
+                controlarLuz.enviar_webhook("on", parametros.get('area'))
+            case "turn_off_light":
+                controlarLuz.enviar_webhook("off", parametros.get('area'))
+            case "reproduzir_musica":
+                if parametros:
+                    musica = parametros.get('musica', None)
+                if musica != None:
+                    spotify.play_music(musica)
+            case "set_despertador":
+                alarmAPI.criar_despertador(parametros.get('horario', None))
+            case "set_horadedormir":
+                alarmAPI.set_horadedormir(parametros.get('horario', None))
+            case "ajustar_volume":
+                vol.set_volume_percent(parametros.get('volume'))
+            case "pausar_musica":
+                spotify.pause_playback()
+            case "continuar_musica":
+                spotify.resume_playback()
+            case "lista":
+                add_item(parametros)
 
 def add_item(parametros):
     if parametros:
@@ -153,5 +164,5 @@ def ouvir_wakeword():
 #ouvir_wakeword()
 currentVolume = vol.get_volume_percent()
 #vol.set_volume_percent(5)
-interpreta_comando("Ligar Bancada")
+interpreta_comando("ligar casa")
 #vol.set_volume_percent(currentVolume)

@@ -163,13 +163,14 @@ class Interpretar:
         
         if match_area:
             parametros["area"] = match_area.group("area") if match_area.group("area") else "todas"
-        if match_percentual:
-            intensidade = int(match_percentual.group("intensidade"))
-            if 0 <= intensidade <= 100:
-                parametros["intensidade"] = intensidade
-        if parametros["area"] == "sala":
-            parametros["area"] = "sala_de_estar"
-        
+            if match_percentual:
+                intensidade = int(match_percentual.group("intensidade"))
+                if 0 <= intensidade <= 100:
+                    parametros["intensidade"] = intensidade
+            if parametros["area"] == "sala":
+                parametros["area"] = "sala_de_estar"
+        else: 
+            parametros["area"] = None
         return parametros
 
     def _extrair_lista(self, frase, intent):

@@ -1,13 +1,14 @@
-﻿from GrocyAPI import GrocyAPI
-import requests
+﻿from flask import Flask, request
 
-def send_to_webhook(items):
-    webhook_url = 'http://192.168.0.235:8123/api/webhook/notifica_lista'
-    headers = {'Content-Type': 'application/json'}
-    data = {'items': items}  # Monta o payload com os itens
-    try:
-        response = requests.post(webhook_url, json=data, headers=headers)
-        response.raise_for_status()
-        print("Dados enviados com sucesso.")
-    except requests.exceptions.RequestException as e:
-        print(f"Erro ao enviar para o webhook: {e}")
+app = Flask(__name__)
+
+@app.route('/mensagem', methods=['POST'])
+def receber_mensagem():
+    data = request.get_json()
+    texto = data.get('mensagem', '')
+    print(f"mensagem recebida: {texto}")
+    # Aqui você pode processar a mensagem como quiser
+    return 'Recebido', 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
