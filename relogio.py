@@ -3,14 +3,11 @@ import time
 import ctypes
 import queue
 
-# Inicializando o Pygame
 pygame.init()
 
-# Função para desligar o monitor
 def turn_off_monitor():
     ctypes.windll.user32.SendMessageW(0xFFFF, 0x112, 0xF170, 2)
 
-# Função para ligar o monitor
 def turn_on_monitor():
     ctypes.windll.user32.mouse_event(1, 0, 0, 0, 0)
 
@@ -60,30 +57,17 @@ def start_clock(command_queue):
             pass
 
         if monitor_on and display_clock:
-            # Preencher a tela com preto (apagando-a visualmente)
             screen.fill(black)
-
-            # Obter o horário atual
             current_time = time.strftime("%d/%m/%Y  %H:%M")  # Formato do relógio
-
-            # Renderizar o horário
             text = font.render(current_time, True, red)
             text_rect = text.get_rect(center=screen.get_rect().center)  # Centralizar texto
-
-            # Desenhar o texto na tela
             screen.blit(text, text_rect)
 
-            # Exibir a mensagem abaixo do relógio, se houver
             if current_message:
                 message_text = message_font.render(current_message, True, white)
                 message_rect = message_text.get_rect(center=(screen.get_rect().centerx, screen.get_rect().centery + 100))
                 screen.blit(message_text, message_rect)
-
-            # Atualizar a tela
             pygame.display.flip()
 
-        # Pequena pausa para evitar uso excessivo de CPU
         pygame.time.delay(100)
-
-    # Encerrando o Pygame
     pygame.quit()
