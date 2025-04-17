@@ -36,10 +36,10 @@ home_assistant_webhook_url_alarm = secrets["home_assistant"]["alarm"]
 caminho_modelos = os.path.join(os.path.dirname(__file__), "modelos")
 caminho_wakeword_asimov = os.path.join(caminho_modelos, "Asimov_en_windows_v3_0_0.ppn")
 
-# porcupine = pvporcupine.create(
-#     access_key=porcupine_access_key,
-#     keyword_paths=[caminho_wakeword_asimov]
-# )
+porcupine = pvporcupine.create(
+    access_key=porcupine_access_key,
+    keyword_paths=[caminho_wakeword_asimov]
+)
 
 grocy = GrocyAPI(
     base_url=secrets["grocy"]["base_url"],
@@ -77,14 +77,14 @@ def selecionar_dispositivo_audio():
 
 indice_dispositivo = 1
 
-# audio_stream = paud.open(
-#     rate=porcupine.sample_rate,
-#     channels=1,
-#     format=pyaudio.paInt16,
-#     input=True,
-#     frames_per_buffer=porcupine.frame_length,
-#     input_device_index=indice_dispositivo
-# )
+audio_stream = paud.open(
+    rate=porcupine.sample_rate,
+    channels=1,
+    format=pyaudio.paInt16,
+    input=True,
+    frames_per_buffer=porcupine.frame_length,
+    input_device_index=indice_dispositivo
+)
 
 def executar_comando(comando, parametros):
 
@@ -132,21 +132,25 @@ def interpreta_comando(texto_detectado):
 
 def transcrever_audio():
     with microfone as source:
+        #recognizer.adjust_for_ambient_noise(source)
         print("Ouvindo para transcrição...")
-        audio = recognizer.listen(source)
         try:
-            transcricao = recognizer.recognize_google(audio, language='pt-BR')
-            print(f"Comando detectado: {transcricao}")
-            interpreta_comando(transcricao)
-            vol.set_volume_percent(currentVolume)
+            audio = recognizer.listen(source, timeout=5, phrase_time_limit=3)
+            try:
+                transcricao = recognizer.recognize_google(audio, language='pt-BR')
+                print(f"Comando detectado: {transcricao}")
+                interpreta_comando(transcricao)
+                vol.set_volume_percent(currentVolume)
+            except sr.UnknownValueError:
+                print("Não foi possível entender o áudio")
+            except sr.RequestError as e:
+                print(f"Erro na requisição ao Google: {e}")
+        except sr.WaitTimeoutError:
+            print("Tempo esgotado. Nenhum áudio detectado.")
         except sr.UnknownValueError:
-            speaker.say("Não entendi o áudio")
-            speaker.runAndWait()
-            print("Erro: Não entendeu o áudio.")
-        except sr.RequestError as e:
-            speaker.say("Não entendi a frase")
-            speaker.runAndWait()
-            print(f"Erro no reconhecimento: {e}")
+            print("Microfone não está disponível ou não funcionando corretamente.")
+        except Exception as e:
+            print(f"Ocorreu um erro inesperado: {e}")
 
 def ouvir_wakeword():
     print("Aguardando wakeword...")
@@ -160,9 +164,9 @@ def ouvir_wakeword():
             transcrever_audio()
             vol.set_volume_percent(currentVolume)
 
-
-#ouvir_wakeword()
 currentVolume = vol.get_volume_percent()
+ouvir_wakeword()
+
 #vol.set_volume_percent(5)
-interpreta_comando("ligar casa")
+#interpreta_comando("ligar casa")
 #vol.set_volume_percent(currentVolume)
