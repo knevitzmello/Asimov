@@ -15,7 +15,9 @@ class Interpretar:
             "turn_on_light": {"ligar", "acender", "ligue", "acenda", "liga", "acende", "ajuste", "ajustar"},
             "turn_off_light": {"desligar", "apagar", "desligue", "apague", "apaga", "desliga", "desative", "desativar", "ativar", "ative"},
             "lista": {"adicionar", "adicione", "inclua", "comprar","insira", "acrescentar", "incluir", "inserir", "põe", "lista", "compras"},
-            "set_timer": {"timer", "avise", "avisar", "lembre-me", "lembrar"}
+            "set_timer": {"timer", "avise", "avisar", "lembre-me", "lembrar"},
+            "pergunta": {"responde", "diz"},
+            "clima":{"previsão", "chuva", "sol", "temperatura", "clima"}
         }
         self.areas_validas = {"sala", 
                               "quarto", 
@@ -31,13 +33,6 @@ class Interpretar:
     
     def classificar_intencao(self, frase):
         frase = frase.lower()
-        
-        if re.search(r"alarme\s+em", frase):
-            return "set_timer"
-        
-        if "alarme" in frase:
-            return "set_alarm"
-        
         palavras = set(frase.split())
         for intent, verbos in self.verbos.items():
             if palavras & verbos:
@@ -54,7 +49,9 @@ class Interpretar:
             "set_horadedormir": self._extrair_alarme,
             "turn_on_light": self._extrair_luz,
             "turn_off_light": self._extrair_luz,
-            "lista": self._extrair_lista
+            "lista": self._extrair_lista,
+            "clima": self._extrair_clima
+
         }
         
         if intent in extratores:
@@ -132,7 +129,6 @@ class Interpretar:
 
         return None
 
-
     def _normalizar_horario(self, texto):
         texto = texto.strip().lower()
 
@@ -174,6 +170,7 @@ class Interpretar:
         return parametros
 
     def _extrair_lista(self, frase, intent):
+
         parametros = {"lista": "compras"}  # Padrão
         verbos_lista_de_compras = self.verbos["lista"] | self.verbos_compras
         verbos_lista = "|".join(re.escape(verbo) for verbo in verbos_lista_de_compras)
@@ -187,7 +184,20 @@ class Interpretar:
                 parametros["lista"] = match.group("tipo_lista").strip()
         
         return parametros
-
+    
+    def _extrair_clima(self, frase, intent):
+        """Versão simplificada que só identifica hoje/amanhã e retorna tudo"""
+        parametros = {"informacao": "geral"}  # Sempre retornar todas as informações
+        
+        # Verificação simplificada para período
+        if "amanhã" in frase.lower() or "amanha" in frase.lower():
+            parametros["periodo"] = "amanha"
+        else:  # Padrão é hoje
+            parametros["periodo"] = "hoje"
+        
+        return parametros
+    
+    
     def process_message(self, frase):
         intent = self.classificar_intencao(frase)
         parametros = self.extrair_parametros(frase, intent) if intent != "unknown" else {}

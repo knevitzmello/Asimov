@@ -13,12 +13,20 @@ from GrocyAPI import GrocyAPI
 import pyttsx3
 import SystemVolume as sv
 import threading
+from OpenMeteoAPI import OpenMeteoAPI
+from SintetizadorVoz import SintetizadorVoz
 
 def carregar_secrets():
     with open("secrets.json", "r") as file:
         return json.load(file)
 
 secrets = carregar_secrets()
+
+api_key = secrets["clima"]
+
+voz = SintetizadorVoz()
+
+voz.falar("Olá!")
 
 porcupine_access_key = secrets["pvporcupine_access_key"]
 spotify = SpotifyAPI(
@@ -36,10 +44,10 @@ home_assistant_webhook_url_alarm = secrets["home_assistant"]["alarm"]
 caminho_modelos = os.path.join(os.path.dirname(__file__), "modelos")
 caminho_wakeword_asimov = os.path.join(caminho_modelos, "Asimov_en_windows_v3_0_0.ppn")
 
-porcupine = pvporcupine.create(
-    access_key=porcupine_access_key,
-    keyword_paths=[caminho_wakeword_asimov]
-)
+# porcupine = pvporcupine.create(
+#     access_key=porcupine_access_key,
+#     keyword_paths=[caminho_wakeword_asimov]
+# )
 
 grocy = GrocyAPI(
     base_url=secrets["grocy"]["base_url"],
@@ -53,6 +61,7 @@ controlarLuz = ControlarLuzAPI(home_assistant_webhook_url_controlar_luz)
 interpretar = Interpretar()
 paud = pyaudio.PyAudio()
 vol = sv.SystemVolume()
+api_clima = OpenMeteoAPI()
 
 speaker=pyttsx3.init()
 voices = speaker.getProperty('voices')
@@ -77,20 +86,19 @@ def selecionar_dispositivo_audio():
 
 indice_dispositivo = 1
 
-audio_stream = paud.open(
-    rate=porcupine.sample_rate,
-    channels=1,
-    format=pyaudio.paInt16,
-    input=True,
-    frames_per_buffer=porcupine.frame_length,
-    input_device_index=indice_dispositivo
-)
+# audio_stream = paud.open(
+#     rate=porcupine.sample_rate,
+#     channels=1,
+#     format=pyaudio.paInt16,
+#     input=True,
+#     frames_per_buffer=porcupine.frame_length,
+#     input_device_index=indice_dispositivo
+# )
 
 def executar_comando(comando, parametros):
-
+    print("Parâmetros extraídos:", parametros)  # Deveria mostrar {"informacao": "geral", "periodo": "amanha"}
     if any(value is None for value in parametros.values()):
         print("Não entendi o comando")
-        #threading.Thread(target=speak, args=("Não entendi o comando",)).start()
     else:
         match comando:
             case "criar_alarme":
@@ -116,6 +124,43 @@ def executar_comando(comando, parametros):
                 spotify.resume_playback()
             case "lista":
                 add_item(parametros)
+            case "clima":
+                resultado = api_clima.obter_previsao(parametros)
+                
+                if "erro" in resultado:
+                    resposta = f"Desculpe, não consegui obter a previsão do tempo. {resultado['erro']}"
+                else:
+                    if "resposta" in resultado:
+                        resposta = resultado["resposta"]
+                    else:
+                        # Limpa e formata os dados específicos para fala
+                        periodo = "hoje" if resultado['periodo'] == "atual" else resultado['periodo']
+                        dia = resultado['data'].split('-')[2]  # Extrai apenas o dia
+                        
+                        # Limpa as temperaturas (remove °C e decimais)
+                        temp_min = resultado['minima'].split('°')[0].split('.')[0]
+                        temp_max = resultado['maxima'].split('°')[0].split('.')[0]
+                        
+                        # Formata a precipitação
+                        precip = resultado['precipitacao'].replace('mm', ' milímetros')
+                        
+                        # Constrói a resposta formatada para fala
+                        resposta = (
+                            f"A previsão para {periodo}, dia {dia}, é: "
+                            f"{resultado['condicao'].lower()}. "
+                            f"Temperaturas entre {temp_min} e {temp_max} graus. "
+                        )
+                        
+                        if float(resultado['precipitacao'].replace('mm', '')) > 0:
+                            resposta += (
+                                f"Precipitação de {precip} "
+                                f"com {resultado['probabilidade_chuva']} por cento de chance."
+                            )
+                
+                # Envia para o sintetizador (sem tratamento adicional)
+                voz.falar(resposta)
+                print("Resposta formatada:", resposta)
+                
 
 def add_item(parametros):
     if parametros:
@@ -165,8 +210,9 @@ def ouvir_wakeword():
             vol.set_volume_percent(currentVolume)
 
 currentVolume = vol.get_volume_percent()
-ouvir_wakeword()
+#ouvir_wakeword()
 
 #vol.set_volume_percent(5)
-#interpreta_comando("ligar casa")
+interpreta_comando("vai ter sol hoje?")
+
 #vol.set_volume_percent(currentVolume)
